@@ -1,0 +1,53 @@
+<div class="form-card">
+  <h2 style="text-align:center; color:#2c3e50; margin-bottom:20px;">Create Account</h2>
+
+  <div *ngIf="errorMessage" class="error-msg">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="success-msg">
+    {{ successMessage }}
+  </div>
+
+  <div>
+    <label style="display:block; margin-bottom:5px; font-weight:bold;">Username</label>
+    <input
+      type="text"
+      [(ngModel)]="username"
+      placeholder="Enter your username"
+      class="form-input"/>
+  </div>
+
+  <div>
+    <label style="display:block; margin-bottom:5px; font-weight:bold;">Email</label>
+    <input
+      type="email"
+      [(ngModel)]="email"
+      placeholder="Enter your email"
+      class="form-input"/>
+  </div>
+
+  <div>
+    <label style="display:block; margin-bottom:5px; font-weight:bold;">Password</label>
+    <input
+      type="password"
+      [(ngModel)]="password"
+      placeholder="Enter your password"
+      class="form-input"/>
+  </div>
+
+  <div>
+    <label style="display:block; margin-bottom:5px; font-weight:bold;">Confirm Password</label>
+    <input
+      type="password"
+      [(ngModel)]="confirmPassword"
+      placeholder="Confirm your password"
+      class="form-input"/>
+  </div>
+
+  <button (click)="onRegister()" class="btn-primary">Register</button>
+
+  <p style="text-align:center; margin-top:15px;">
+    Already have an account? <a href="/login" style="color:#2c3e50;">Login</a>
+  </p>
+</div>
