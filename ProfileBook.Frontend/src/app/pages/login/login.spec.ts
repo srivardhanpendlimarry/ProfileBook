@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Login } from './login';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { routes } from '../../app.routes';
 
 describe('Login Component', () => {
@@ -10,7 +11,10 @@ describe('Login Component', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Login],
-      providers: [provideRouter(routes)]
+      providers: [
+        provideRouter(routes),
+        provideHttpClient()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(Login);
@@ -43,17 +47,17 @@ describe('Login Component', () => {
     expect(component.errorMessage).toBe('Password must be at least 6 characters!');
   });
 
-  it('should login as admin with correct credentials', () => {
-    component.username = 'admin';
-    component.password = 'admin123';
-    component.onLogin();
-    expect(localStorage.getItem('role')).toBe('Admin');
-  });
-
-  it('should login as user with any other credentials', () => {
+  it('should set isLoading to true when valid credentials entered', () => {
     component.username = 'testuser';
     component.password = '123456';
     component.onLogin();
-    expect(localStorage.getItem('role')).toBe('User');
+    expect(component.isLoading).toBeTruthy();
+  });
+
+  it('should have empty error message with valid inputs', () => {
+    component.username = 'testuser';
+    component.password = '123456';
+    component.onLogin();
+    expect(component.errorMessage).toBe('');
   });
 });

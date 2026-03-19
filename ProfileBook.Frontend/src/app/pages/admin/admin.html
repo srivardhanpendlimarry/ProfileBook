@@ -2,21 +2,79 @@
   <h2 style="color:#2c3e50; margin-bottom:20px;">🔧 Admin Panel</h2>
 
   <!-- Stats Cards -->
-  <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:30px;" class="admin-grid">
+  <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:30px;">
     <div style="flex:1; min-width:150px; background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); text-align:center;">
       <div style="font-size:35px;">👥</div>
       <h3 style="color:#2c3e50;">Users</h3>
       <p style="font-size:24px; font-weight:bold; color:#2c3e50;">{{ users.length }}</p>
     </div>
     <div style="flex:1; min-width:150px; background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); text-align:center;">
-      <div style="font-size:35px;">📝</div>
-      <h3 style="color:#27ae60;">Posts</h3>
-      <p style="font-size:24px; font-weight:bold; color:#27ae60;">2</p>
+      <div style="font-size:35px;">⏳</div>
+      <h3 style="color:#f39c12;">Pending</h3>
+      <p style="font-size:24px; font-weight:bold; color:#f39c12;">{{ pendingPosts.length }}</p>
     </div>
     <div style="flex:1; min-width:150px; background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); text-align:center;">
       <div style="font-size:35px;">🚨</div>
       <h3 style="color:#e74c3c;">Reports</h3>
-      <p style="font-size:24px; font-weight:bold; color:#e74c3c;">1</p>
+      <p style="font-size:24px; font-weight:bold; color:#e74c3c;">{{ reports.length }}</p>
+    </div>
+  </div>
+
+  <!-- Pending Posts Section -->
+  <div style="background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); margin-bottom:30px;">
+    <h3 style="color:#2c3e50; margin-bottom:15px;">⏳ Pending Posts for Approval</h3>
+
+    <div *ngIf="pendingPosts.length === 0" style="text-align:center; color:#666; padding:20px;">
+      No pending posts!
+    </div>
+
+    <div *ngFor="let post of pendingPosts"
+      style="border:1px solid #ddd; padding:15px; border-radius:8px; margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <strong style="color:#2c3e50;">{{ post.username }}</strong>
+          <p style="margin:5px 0; color:#333;">{{ post.content }}</p>
+          <small style="color:#666;">{{ post.createdAt | date:'medium' }}</small>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button
+            (click)="approvePost(post.postId)"
+            style="padding:8px 15px; background:#27ae60; color:white; border:none; border-radius:5px; cursor:pointer;">
+            ✅ Approve
+          </button>
+          <button
+            (click)="rejectPost(post.postId)"
+            style="padding:8px 15px; background:#e74c3c; color:white; border:none; border-radius:5px; cursor:pointer;">
+            ❌ Reject
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reports Section -->
+  <div style="background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); margin-bottom:30px;">
+    <h3 style="color:#e74c3c; margin-bottom:15px;">🚨 Reported Users</h3>
+
+    <div *ngIf="reports.length === 0" style="text-align:center; color:#666; padding:20px;">
+      No reports yet!
+    </div>
+
+    <div *ngFor="let report of reports"
+      style="border:1px solid #ffcccc; padding:15px; border-radius:8px; margin-bottom:10px; background:#fff5f5;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div>
+          <p style="margin:0;"><strong>Reported:</strong> {{ report.reportedUsername }}</p>
+          <p style="margin:4px 0;"><strong>Reported by:</strong> {{ report.reportingUsername }}</p>
+          <p style="margin:4px 0;"><strong>Reason:</strong> {{ report.reason }}</p>
+          <small style="color:#666;">{{ report.timeStamp | date:'medium' }}</small>
+        </div>
+        <button
+          (click)="deleteReport(report.reportId)"
+          style="padding:8px 15px; background:#e74c3c; color:white; border:none; border-radius:5px; cursor:pointer;">
+          🗑️ Dismiss
+        </button>
+      </div>
     </div>
   </div>
 
@@ -31,24 +89,18 @@
             <th style="padding:12px; text-align:left;">Username</th>
             <th style="padding:12px; text-align:left;">Email</th>
             <th style="padding:12px; text-align:left;">Role</th>
-            <th style="padding:12px; text-align:left;">Status</th>
             <th style="padding:12px; text-align:left;">Actions</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let user of users" style="border-bottom:1px solid #ddd;">
-            <td style="padding:12px;">{{ user.id }}</td>
+            <td style="padding:12px;">{{ user.userId }}</td>
             <td style="padding:12px;">{{ user.username }}</td>
             <td style="padding:12px;">{{ user.email }}</td>
             <td style="padding:12px;">
-              <span style="background:#3498db; color:white; padding:3px 8px; border-radius:10px; font-size:12px;">
-                {{ user.role }}
-              </span>
-            </td>
-            <td style="padding:12px;">
-              <span [style.background]="user.status === 'Active' ? '#27ae60' : '#e74c3c'"
+              <span [style.background]="user.role === 'Admin' ? '#8e44ad' : '#3498db'"
                 style="color:white; padding:3px 8px; border-radius:10px; font-size:12px;">
-                {{ user.status }}
+                {{ user.role }}
               </span>
             </td>
             <td style="padding:12px;">
@@ -58,7 +110,7 @@
                 ✏️ Edit
               </button>
               <button
-                (click)="deleteUser(user.id)"
+                (click)="deleteUser(user.userId)"
                 style="padding:5px 10px; background:#e74c3c; color:white; border:none; border-radius:5px; cursor:pointer;">
                 🗑️ Delete
               </button>

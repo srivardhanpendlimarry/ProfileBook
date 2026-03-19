@@ -27,5 +27,6 @@ namespace ProfileBook.API.Models
         public ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
         public ICollection<Report> ReportsGiven { get; set; } = new List<Report>();
         public ICollection<Report> ReportsReceived { get; set; } = new List<Report>();
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

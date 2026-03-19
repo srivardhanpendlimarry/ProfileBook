@@ -3,44 +3,97 @@
 
   <!-- Create Post Box -->
   <div style="background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); margin-bottom:20px;">
+    <h4 style="color:#2c3e50; margin-bottom:10px;">Create Post</h4>
+
+    <div *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="success-msg">{{ successMessage }}</div>
+
     <textarea
+      [(ngModel)]="newPostContent"
       placeholder="What's on your mind?"
-      style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; height:80px; resize:none; font-size:16px;">
+      style="width:100%; padding:10px; border:1px solid #ddd; border-radius:5px; height:80px; resize:none; font-size:16px; box-sizing:border-box;">
     </textarea>
-    <button class="btn-primary" style="margin-top:10px;">Submit Post</button>
+
+    <button
+      (click)="submitPost()"
+      style="width:100%; padding:12px; background:#2c3e50; color:white; border:none; border-radius:5px; cursor:pointer; font-size:16px; margin-top:10px;">
+      {{ isLoading ? 'Submitting...' : 'Submit Post' }}
+    </button>
+  </div>
+
+  <!-- No posts message -->
+  <div *ngIf="posts.length === 0"
+    style="text-align:center; color:#666; padding:30px;">
+    <p>No approved posts yet. Be the first to post!</p>
   </div>
 
   <!-- Post Cards -->
-  <div style="background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); margin-bottom:15px;">
+  <div *ngFor="let post of posts; let i = index"
+    style="background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); margin-bottom:15px;">
+
+    <!-- Post Header -->
     <div style="display:flex; align-items:center; margin-bottom:10px;">
-      <div style="width:40px; height:40px; background:#2c3e50; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; margin-right:10px;">J</div>
+      <div style="width:40px; height:40px; background:#2c3e50; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; margin-right:10px;">
+        {{ post.username?.charAt(0)?.toUpperCase() }}
+      </div>
       <div>
-        <strong>John Doe</strong>
-        <p style="color:#666; font-size:12px; margin:0;">2 hours ago</p>
+        <strong>{{ post.username }}</strong>
+        <p style="color:#666; font-size:12px; margin:0;">{{ post.createdAt | date:'medium' }}</p>
       </div>
     </div>
-    <p style="margin-bottom:15px;">This is a sample post content. More posts will appear here!</p>
-    <div style="display:flex; gap:10px;">
-      <button style="padding:8px 15px; background:#f0f0f0; border:none; border-radius:5px; cursor:pointer;">👍 Like</button>
-      <button style="padding:8px 15px; background:#f0f0f0; border:none; border-radius:5px; cursor:pointer;">💬 Comment</button>
-      <button style="padding:8px 15px; background:#f0f0f0; border:none; border-radius:5px; cursor:pointer;">🚨 Report</button>
-    </div>
-  </div>
 
-  <div style="background:white; padding:20px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); margin-bottom:15px;">
-    <div style="display:flex; align-items:center; margin-bottom:10px;">
-      <div style="width:40px; height:40px; background:#e74c3c; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:bold; margin-right:10px;">J</div>
-      <div>
-        <strong>Jane Smith</strong>
-        <p style="color:#666; font-size:12px; margin:0;">5 hours ago</p>
+    <!-- Post Content -->
+    <p style="margin-bottom:15px;">{{ post.content }}</p>
+
+    <!-- Action Buttons -->
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <button
+        (click)="likePost(post.postId, i)"
+        style="padding:8px 15px; background:#3498db; color:white; border:none; border-radius:5px; cursor:pointer;">
+        👍 Like {{ post.likes > 0 ? '(' + post.likes + ')' : '' }}
+      </button>
+      <button
+        (click)="toggleComments(post.postId)"
+        style="padding:8px 15px; background:#27ae60; color:white; border:none; border-radius:5px; cursor:pointer;">
+        💬 Comment {{ (postComments[post.postId]?.length ?? 0) > 0 ? '(' + postComments[post.postId]!.length + ')' : '' }}
+      </button>
+      <button
+        (click)="reportUser(post.userId)"
+        style="padding:8px 15px; background:#e74c3c; color:white; border:none; border-radius:5px; cursor:pointer;">
+        🚨 Report
+      </button>
+    </div>
+
+    <!-- Comments Section -->
+    <div *ngIf="showComments[post.postId]"
+      style="margin-top:15px; border-top:1px solid #eee; padding-top:15px;">
+
+      <!-- Existing Comments -->
+      <div *ngFor="let comment of postComments[post.postId]"
+        style="background:#f9f9f9; padding:10px; border-radius:8px; margin-bottom:8px;">
+        <strong style="font-size:13px; color:#2c3e50;">{{ comment.username }}</strong>
+        <p style="margin:4px 0 0; font-size:13px;">{{ comment.content }}</p>
+        <small style="color:#999;">{{ comment.createdAt | date:'short' }}</small>
+      </div>
+
+      <div *ngIf="(postComments[post.postId]?.length ?? 0) === 0"
+        style="color:#999; font-size:13px; margin-bottom:10px;">
+        No comments yet. Be the first!
+      </div>
+
+      <!-- Add Comment -->
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <input
+          type="text"
+          [(ngModel)]="commentInputs[post.postId]"
+          placeholder="Write a comment..."
+          style="flex:1; padding:8px; border:1px solid #ddd; border-radius:5px; font-size:14px;"/>
+        <button
+          (click)="submitComment(post.postId)"
+          style="padding:8px 15px; background:#2c3e50; color:white; border:none; border-radius:5px; cursor:pointer;">
+          Post
+        </button>
       </div>
     </div>
-    <p style="margin-bottom:15px;">Another sample post. Welcome to ProfileBook!</p>
-    <div style="display:flex; gap:10px;">
-      <button style="padding:8px 15px; background:#f0f0f0; border:none; border-radius:5px; cursor:pointer;">👍 Like</button>
-      <button style="padding:8px 15px; background:#f0f0f0; border:none; border-radius:5px; cursor:pointer;">💬 Comment</button>
-      <button style="padding:8px 15px; background:#f0f0f0; border:none; border-radius:5px; cursor:pointer;">🚨 Report</button>
-    </div>
   </div>
-
 </div>

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Register } from './register';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { routes } from '../../app.routes';
 
 describe('Register Component', () => {
@@ -10,7 +11,10 @@ describe('Register Component', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Register],
-      providers: [provideRouter(routes)]
+      providers: [
+        provideRouter(routes),
+        provideHttpClient()
+      ]
     }).compileComponents();
 
     fixture = TestBed.createComponent(Register);
@@ -50,12 +54,12 @@ describe('Register Component', () => {
     expect(component.errorMessage).toBe('Passwords do not match!');
   });
 
-  it('should show success message with valid data', () => {
+  it('should set isLoading when valid data entered', () => {
     component.username = 'testuser';
     component.email = 'test@example.com';
     component.password = '123456';
     component.confirmPassword = '123456';
     component.onRegister();
-    expect(component.successMessage).toBe('Registration successful! Redirecting to login...');
+    expect(component.isLoading).toBeTruthy();
   });
 });

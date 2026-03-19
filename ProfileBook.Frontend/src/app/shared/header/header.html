@@ -6,11 +6,12 @@
     <ng-container *ngIf="isLoggedIn()">
       <span style="color:#bdc3c7;">👤 {{ getUsername() }}</span>
       <a href="/feed" style="color:white; text-decoration:none;">Feed</a>
+      <a href="/search" style="color:white; text-decoration:none;">🔍 Search</a>
       <a href="/messages" style="color:white; text-decoration:none;">Messages</a>
       <a href="/admin" style="color:white; text-decoration:none;">Admin</a>
       <button
         (click)="logout()"
-        style="color:white; text-decoration:none; background:#e74c3c; padding:5px 15px; border-radius:5px; border:none; cursor:pointer;">
+        style="color:white; background:#e74c3c; padding:5px 15px; border-radius:5px; border:none; cursor:pointer;">
         Logout
       </button>
     </ng-container>

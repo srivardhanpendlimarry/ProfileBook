@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -16,8 +17,9 @@ export class Register {
   confirmPassword = '';
   errorMessage = '';
   successMessage = '';
+  isLoading = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient) {}
 
   onRegister() {
     this.errorMessage = '';
@@ -52,8 +54,24 @@ export class Register {
       return;
     }
 
-    // Sprint II: connect to API
-    this.successMessage = 'Registration successful! Redirecting to login...';
-    setTimeout(() => this.router.navigate(['/login']), 2000);
+    this.isLoading = true;
+
+    // Call real API
+    this.http.post<any>('http://localhost:5215/api/User/register', {
+      username: this.username,
+      email: this.email,
+      password: this.password,
+      role: 'User'
+    }).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.successMessage = 'Registration successful! Redirecting to login...';
+        setTimeout(() => this.router.navigate(['/login']), 2000);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.error || 'Registration failed!';
+      }
+    });
   }
 }

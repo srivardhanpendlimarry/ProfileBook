@@ -17,9 +17,12 @@ namespace ProfileBook.API.Models
 
         public string Status { get; set; } = "Pending";
 
+        public int? Likes { get; set; } = 0;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation
         public User User { get; set; } = null!;
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

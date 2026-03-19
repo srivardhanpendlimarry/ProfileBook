@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -13,8 +14,9 @@ export class Login {
   username = '';
   password = '';
   errorMessage = '';
+  isLoading = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private http: HttpClient) {}
 
   onLogin() {
     this.errorMessage = '';
@@ -32,17 +34,33 @@ export class Login {
       return;
     }
 
-    // Check if admin or user
-    if (this.username === 'admin' && this.password === 'admin123') {
-      localStorage.setItem('token', 'admin-token-123');
-      localStorage.setItem('username', this.username);
-      localStorage.setItem('role', 'Admin');
-      this.router.navigate(['/admin']);
-    } else {
-      localStorage.setItem('token', 'user-token-123');
-      localStorage.setItem('username', this.username);
-      localStorage.setItem('role', 'User');
-      this.router.navigate(['/feed']);
-    }
+    this.isLoading = true;
+
+    // Call real API
+    this.http.post<any>('http://localhost:5215/api/User/login', {
+      username: this.username,
+      password: this.password
+    }).subscribe({
+      next: (response) => {
+        // Save to localStorage
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('username', response.username);
+        localStorage.setItem('role', response.role);
+        localStorage.setItem('userId', response.userId.toString());
+
+        this.isLoading = false;
+
+        // Redirect based on role
+        if (response.role === 'Admin') {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/feed']);
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = 'Invalid username or password!';
+      }
+    });
   }
 }

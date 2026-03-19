@@ -13,6 +13,7 @@ namespace ProfileBook.API.Data
         public DbSet<Report> Reports { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<UserGroup> UserGroups { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +47,19 @@ namespace ProfileBook.API.Data
                 .HasOne(r => r.ReportingUser)
                 .WithMany(u => u.ReportsGiven)
                 .HasForeignKey(r => r.ReportingUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Comment relationships
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.Post)
+                .WithMany(p => p.Comments)
+                .HasForeignKey(c => c.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.User)
+                .WithMany(u => u.Comments)
+                .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
